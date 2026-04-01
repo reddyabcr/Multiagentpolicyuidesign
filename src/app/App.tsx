@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from "react";
+import { AnimatePresence } from "motion/react";
 import { Header } from "./components/Header";
 import { InputSection } from "./components/InputSection";
 import { ProgressTracker } from "./components/ProgressTracker";
 import { AgentOutput, AgentMessage, AgentType } from "./components/AgentOutput";
+import { LoadingScreen } from "./components/LoadingScreen";
+import { SettingsDialog } from "./components/SettingsDialog";
 import { toast } from "sonner";
 import { Toaster } from "./components/ui/sonner";
 
@@ -30,6 +33,10 @@ const AGENT_RESPONSES: Record<
 };
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [voiceSpeed, setVoiceSpeed] = useState(1.0);
+  const [voicePitch, setVoicePitch] = useState(1.0);
   const [topic, setTopic] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -40,6 +47,15 @@ export default function App() {
 
   const recognitionRef = useRef<any>(null);
   const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Initial loading effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2500); // 2.5 seconds loading
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Initialize speech recognition
   useEffect(() => {
@@ -108,8 +124,8 @@ export default function App() {
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
+    utterance.rate = voiceSpeed;
+    utterance.pitch = voicePitch;
     utterance.volume = 1.0;
 
     utterance.onend = () => {
@@ -225,8 +241,21 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
+      <AnimatePresence mode="wait">
+        {isLoading && <LoadingScreen />}
+      </AnimatePresence>
+
+      <SettingsDialog
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        voiceSpeed={voiceSpeed}
+        onVoiceSpeedChange={setVoiceSpeed}
+        voicePitch={voicePitch}
+        onVoicePitchChange={setVoicePitch}
+      />
+
       <Toaster position="top-right" theme="dark" />
-      <Header />
+      <Header onSettingsClick={() => setIsSettingsOpen(true)} />
       <main className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="space-y-6">
           <InputSection

@@ -1,6 +1,10 @@
 import { Bot, Settings } from "lucide-react";
 
-export function Header() {
+interface HeaderProps {
+  onSettingsClick: () => void;
+}
+
+export function Header({ onSettingsClick }: HeaderProps) {
   return (
     <header className="border-b border-zinc-800 bg-zinc-950/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
@@ -18,7 +22,10 @@ export function Header() {
               </p>
             </div>
           </div>
-          <button className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white">
+          <button
+            onClick={onSettingsClick}
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white"
+          >
             <Settings className="h-5 w-5" />
           </button>
         </div>
